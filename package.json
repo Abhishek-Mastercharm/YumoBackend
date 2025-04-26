@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "A Backend Code For First Time in My life For My Project Yumo",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "dev": "nodemon src/index.js"
   },
   "keywords": [
     "yumo",
@@ -13,5 +14,8 @@
     "Dedication"
   ],
   "author": "Abhishek Pandey",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
 }
