@@ -38,7 +38,7 @@ const userSchema = new Schema({
     },
     watchHistory: [
         {
-            type: Schema.Types.ObjectId(),
+            type: Schema.Types.ObjectId,
             ref: "Video"
         }
     ],
@@ -56,7 +56,7 @@ userSchema.pre("save", async function (next) {
 
     //  "Assault Hash Round" the number of iterations or steps performed during the hashing process.
     // if the Password is modified
-    this.password = bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
     next()
 })
 
