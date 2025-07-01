@@ -24,4 +24,16 @@ app.use(express.urlencoded({limit: "16kb"}));
 app.use(express.static("public"))
 
 
+// Routes here Import - Route Segrigate
+
+import router from "./routes/user.routes.js"
+
+
+// Routes Declaration
+// - Here use()  middleware used Bcz the Router and Controller are seperate from this file
+app.use("/api/v1/users", router);
+
+// URL EXAMPLE:    http://localhost:8000/api/v1/users/register
+
+
 export { app }
