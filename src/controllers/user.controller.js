@@ -19,7 +19,6 @@ const registerUser = asyncHandler( async (req, res) =>{
 
     // 1. Get User Detail from Frontend
     const {username, email, fullName, password} = req.body
-    console.log("UserName: ", username);
 
     // 2. Validation - not empty
     if (
@@ -31,7 +30,7 @@ const registerUser = asyncHandler( async (req, res) =>{
     }
     
     // 3. Check if user Already Exist : check by Username, Email
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
     
@@ -41,7 +40,13 @@ const registerUser = asyncHandler( async (req, res) =>{
 
     // 4. Check For images , Check For Avtar
     const avtarLocalPath = req.files?.avtar[0]?.path
-    const coverImageLocalPath = req.files?.coverImage[0]?.path
+    // const coverImageLocalPath = req.files?.coverImage[0]?.path
+
+    let coverImageLocalPath;
+    
+    if (req.files && Array.isArray(req.files.coverImage) && req.file.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
     
     if (!avtarLocalPath) {
         throw new ApiError(400, "Avtar File Is Required")
@@ -66,12 +71,12 @@ const registerUser = asyncHandler( async (req, res) =>{
     })
 
     // 7. Remove Password & Refresh Token feild From Response
-    const createdUser = await user.findById(user._id).select(
+    const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
 
     // 8. check For User Creation (Is response Coming) 
-    if (createdUser) {
+    if (!createdUser) {
         throw new ApiError(500, "Something Went Wrong while registering the user")
     }
 
