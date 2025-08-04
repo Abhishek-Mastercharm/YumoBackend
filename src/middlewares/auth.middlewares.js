@@ -2,17 +2,17 @@
 
 // Logout Route main iska use hoga 
 
-import { ApiError } from "../utils/apiError";
-import { asyncHandler } from "../utils/asyncHandler";
+import { ApiError } from "../utils/apiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
-import { User } from "../models/user.models";
+import { User } from "../models/user.models.js";
 
 export const verifyJwt = asyncHandler( async(req, res, next)=>{
     // "authorization: Bearer <token>"
     
     // Req ke pass cookies ka access hai check in app.js
     try {
-        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
+        const token = req.cookies?.AccessToken || req.header("Authorization")?.replace("Bearer ", "")
     
         console.log("Token: ",token)
     
