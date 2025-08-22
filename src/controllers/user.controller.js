@@ -39,11 +39,8 @@ const registerUser = asyncHandler( async (req, res) =>{
     const {username, email, fullName, password} = req.body
 
     // 2. Validation - not empty
-    if (
-        [username, email, fullName, password].some((field)=>{
-            field?.trim() === ""
-        })
-    ) {
+    if ([username, email, fullName, password].some(field => !field || field.trim() === ""))
+    {
         throw new ApiError(400, "All Feilds are required")
     }
     
@@ -125,7 +122,10 @@ const loginUser = asyncHandler(async (req, res)=>{
 
     // 3. find the user
     const user = await User.findOne({
-        $or: [{username},{email}]
+        $or: [
+        username ? { username } : null,
+        email ? { email } : null
+        ].filter(Boolean)   // Filter() remove nulls or falsy values
     })
 
     if (!user) {
@@ -142,7 +142,7 @@ const loginUser = asyncHandler(async (req, res)=>{
     // 5. access token and refresh token generate and send to user
     const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id)
 
-    const loggedInUser = await User.findOne(user._id).select("-password -refreshToken")
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
     // 6. send token to cookies and response 
 
@@ -190,13 +190,15 @@ const logOutUser = asyncHandler( async (req, res) =>{
 
     return res
     .status(200)
-    .clearCookie("AccessToken", accessToken, options)
-    .clearCookie("RefreshToken", refreshToken, options)
+    .clearCookie("AccessToken", options)
+    .clearCookie("RefreshToken", options)
     .json(
         new apiResponse(200,{},"User Logged Out")
     )
 
 })
+
+
 
 export {
     registerUser,
