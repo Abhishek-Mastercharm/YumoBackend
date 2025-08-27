@@ -3,7 +3,7 @@ import {ApiError} from "../utils/apiError.js";
 import {User} from "../models/user.models.js";
 import {uploadOnCloudinary} from "../utils/Cloudinary.js";
 import { apiResponse } from "../utils/apiResponse.js";
-import { response } from "express";
+import jwt from "jsonwebtoken";
 
 // Method For generate access and refresh token
 const generateAccessAndRefreshToken = async (userId) =>{
@@ -198,10 +198,54 @@ const logOutUser = asyncHandler( async (req, res) =>{
 
 })
 
+// Refresh access token ka end point
+const refreshAccessToken = asyncHandler( async (req, res) =>{
+    const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
+    if (!incomingRefreshToken) {
+        throw new ApiError(401,"Unauthorized Request")
+    }
 
+    // Decorded Token Milega isse
+    try {
+        const decordedToken =  jwt.verify(
+            incomingRefreshToken, 
+            process.env.REFRESH_TOKEN_SECRET
+        )
+    
+        const user = await User.findById(decordedToken?._id)
+        if (!user) {
+            throw new ApiError(401,"Invalid Refresh Token")
+        }
+    
+        if (incomingRefreshToken !== User?.refreshToken) {
+            throw new ApiError(401,"User Refresh Token is Expired or Used")
+        }
+    
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+    
+        const {accessToken, newRefreshToken} = await generateAccessAndRefreshToken(user._id)
+        return res
+        .status(200)
+        .cookie("AccessToken", accessToken, options)
+        .cookie("RefreshToken", newRefreshToken, options)
+        .json(
+            new apiResponse(
+                200,
+                {accessToken, refreshToken: newRefreshToken},
+                "Access Token Refreshed Successfully"
+            )
+        )
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid Refresh Token")
+    }
+})
 
 export {
     registerUser,
     loginUser,
-    logOutUser
+    logOutUser,
+    refreshAccessToken
 }
