@@ -172,8 +172,8 @@ const logOutUser = asyncHandler( async (req, res) =>{
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
-                refreshToken: undefined
+            $unset:{
+                refreshToken: 1 //THis remove the feild from the document
             }
         },
         {
@@ -273,6 +273,7 @@ const getCurrentUser = asyncHandler( async (req, res) =>{
 })
 
 const updateAccountDetail = asyncHandler( async (req, res) =>{
+    console.log("\Account detail received: ", req.body);
     const {fullName,email} = req.body
     if (!fullName || !email) {
         throw new ApiError(400, "All Fields are required")
@@ -297,6 +298,8 @@ const updateAccountDetail = asyncHandler( async (req, res) =>{
 })
 
 const updateUserAvtar = asyncHandler( async (req, res) =>{
+    console.log("\nFile received: ", req.file);
+
     const avtarLocalPath = req.file?.path
     if (!avtarLocalPath) {
         throw new ApiError(400, "Avatar File is missing")
@@ -308,7 +311,7 @@ const updateUserAvtar = asyncHandler( async (req, res) =>{
         throw new ApiError(400, "Error while uploading Avtar")
     }
 
-    await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
@@ -337,7 +340,7 @@ const updateUserCoverImage = asyncHandler( async (req, res) =>{
         throw new ApiError(400, "Error while uploading Cover Image")
     }
 
-    await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
